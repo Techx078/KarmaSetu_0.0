@@ -1,0 +1,7 @@
+.box {
+    width: 200px;
+    height: 200px;
+    background-color: teal;
+    opacity: 1;
+    transition: opacity 0.5s ease; /* Transition for opacity */
+  }
