@@ -112,6 +112,7 @@ const CommunityPage = () => {
   const [states, setStates] = useState([]);
   const navigate = useNavigate();
   const { authUser } = useAuth();
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const fetchServiceProviders = async () => {

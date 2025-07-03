@@ -7,6 +7,7 @@ import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
 import io from "socket.io-client";
 import LocationTracker from "../assets/commponents/LocationTracker ";
+import { useSocket } from "../context/Socket.context";
 import {
   FaUser,
   FaClock,
@@ -15,12 +16,7 @@ import {
   FaAngleDown,
 } from "react-icons/fa";
 
-const socket = io("http://localhost:3000", {
-  transports: ["websocket"],
-  withCredentials: true,
-});
 
-// RequestDetails Component
 const RequestDetails = ({ request }) => (
   <div className="bg-white rounded-xl p-4 sm:p-6 mb-4 border border-gray-100 shadow-md hover:shadow-lg transition-all duration-300">
     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
@@ -332,6 +328,7 @@ const CompletedRequests = ({
 };
 
 const User = () => {
+  const { socket } = useSocket();
   const { id } = useParams();
   const { authUser } = useAuth();
   const [Profile, setProfile] = useState(null);
@@ -356,6 +353,8 @@ const User = () => {
     }
     setProfile_User();
   }, []);
+
+  
 
   const fetchBookings = async () => {
     try {
@@ -463,6 +462,36 @@ const User = () => {
 
   useEffect(() => {
     fetchBookings();
+    if (socket) {
+      socket.emit("join", id);
+      console.log(`[Provider] Joined room: ${id}`);
+
+      const moveBooking = (booking, removeFrom, addTo, removeSetter, addSetter) => {
+        removeSetter((prev) => prev.filter((b) => b._id !== booking._id));
+        addSetter((prev) => [...prev, booking]);
+      };
+
+      socket.on("pendingU", (booking) => {
+        console.log("[Socket] pendingS:", booking);
+        setPendingRequest((prev) => [...prev, booking]);
+      });
+
+      socket.on("pendingToAcceptU", (booking) => {
+        console.log("[Socket] pendingToAcceptS:", booking);
+        moveBooking(booking, "Pending", "Accepted", setPendingRequest, setAcceptedRequest);
+      });
+
+      socket.on("acceptToStartU", (booking) => {
+        
+        console.log("[Socket] acceptToStartS:", booking);
+        moveBooking(booking, "Accepted", "Ongoing", setAcceptedRequest, setOngoingRequest);
+      });
+
+      socket.on("startToEndU", (booking) => {
+        console.log("[Socket] startToEnd:", booking);
+        moveBooking(booking, "Ongoing", "Completed", setOngoingRequest, setCompletedRequest);
+      });
+
     socket.on("connect", () =>
       console.log(`[User] Socket connected: ${socket.id}`)
     );
@@ -484,11 +513,21 @@ const User = () => {
       });
       fetchBookings();
     });
+  }
 
     return () => {
+       if (socket) {
+        socket.off("paymentReceived");
+        socket.off("pendingS");
+        socket.off("pendingToAcceptS");
+        socket.off("acceptToStartS");
+        socket.off("startToEndS");
+      
+
       socket.off("bookingEnded");
       socket.off("connect");
       socket.off("connect_error");
+       }
     };
   }, [id]);
 

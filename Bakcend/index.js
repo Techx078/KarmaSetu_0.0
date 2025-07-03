@@ -12,9 +12,7 @@ app.use(express.json());
 const connectToDb = require("./data/conectToDb");
 connectToDb();
 
-//error handling
-const ErrorHandling = require('./Middleware/ErrorHandling.MiddleWare')
-app.use(ErrorHandling);
+
 
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
@@ -140,6 +138,9 @@ app.use("/api", paymentRouter);
 app.use("/Review_api", ReviewRouter);
 app.use('/location', locationRoutes);
 
+//error handling
+const ErrorHandling = require('./Middleware/ErrorHandling.MiddleWare')
+app.use(ErrorHandling);
 module.exports = { io, activeSockets };
 
 server.listen(3000, () => {

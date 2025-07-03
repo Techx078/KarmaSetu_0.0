@@ -164,15 +164,10 @@ function Signup() {
       const errorMsg =
         error.response?.data?.error || error.message || "An error occurred.";
 
-      if (status >= 400 && status < 500) {
-        // Client errors - show toast
-        setError(errorMsg);
-        toast.error(errorMsg);
-      } else {
         // Server or unknown error - navigate to error page
          const errorMsg1 = error.response?.data?.message || error.message || error.response?.data?.error || "register error"  ;
          navigate("/error", { state: { message: errorMsg1 } });
-      }
+      
     } finally {
       setLoading(false);
     }

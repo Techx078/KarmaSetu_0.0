@@ -96,6 +96,8 @@ module.exports.BookMyService = catchAsync(async (req, res, next) => {
 
   const userSocketId = getSocketId(userId);
   const spSocketId = getSocketId(serviceProviderId);
+  console.log(userSocketId + " " + spSocketId);
+  
   if( !userSocketId || !spSocketId ){
     return next(new AppError('socketId error', 400));
   }
@@ -461,7 +463,7 @@ module.exports.getBookingFromServereForServiceProvider = async (req, res) => {
       return res.status(400).json({ error: "Service Provider ID is required" });
     }
 
-    const bookings = await Booking.find({ serviceProvider: id })
+    const response = await Booking.find({ serviceProvider: id })
       .populate("User")
       .populate("serviceProvider")
       .select(
@@ -469,9 +471,10 @@ module.exports.getBookingFromServereForServiceProvider = async (req, res) => {
       )
       .sort({ startTime: 1 });  // Sort by startTime ascending
 
-    console.log(bookings);
-
-    res.status(200).json({ bookings });
+     console.log(response);
+      if (response) {
+        res.status(200).json({ response });
+      }
   } catch (e) {
     console.error("Error fetching bookings:", e);
     res.status(500).json({ error: "Internal Server Error" });
@@ -487,7 +490,7 @@ module.exports.getBookingFromServereForUser = async (req, res) => {
       return res.status(400).json({ error: "User ID is required" });
     }
 
-    const bookings = await Booking.find({ User: id })
+    const response = await Booking.find({ User: id })
       .populate("User", "fullname profileImage")
       .populate("serviceProvider")
       .select(
@@ -495,9 +498,10 @@ module.exports.getBookingFromServereForUser = async (req, res) => {
       )
       .sort({ startTime: -1 }); // Sort by startTime descending (latest first)
 
-    console.log(bookings);
-
-    res.status(200).json({ bookings });
+       console.log(response);
+      if (response) {
+        res.status(200).json({ response });
+      }
   } catch (error) {
     console.error("Error fetching bookings for user:", error);
     res.status(500).json({ error: "Internal Server Error" });

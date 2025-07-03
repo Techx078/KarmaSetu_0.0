@@ -76,6 +76,7 @@ const ServiceProviderProfile = () => {
       socket.on("pendingS", (booking) => {
         console.log("[Socket] pendingS:", booking);
         setPendingRequest((prev) => [...prev, booking]);
+        toast.success("You have a new request!!!!");
       });
 
       socket.on("pendingToAcceptS", (booking) => {
@@ -86,6 +87,7 @@ const ServiceProviderProfile = () => {
       socket.on("acceptToStartS", (booking) => {
         console.log("[Socket] acceptToStartS:", booking);
         moveBooking(booking, "Accepted", "Ongoing", setAcceptedRequest, setOngoingRequest);
+        toast.success("booking started by the user !");
       });
 
       socket.on("startToEndS", (booking) => {
